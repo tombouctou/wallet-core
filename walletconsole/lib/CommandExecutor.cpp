@@ -10,6 +10,7 @@
 #include "Coins.h"
 #include "Util.h"
 #include "Address.h"
+#include "Coin.h"
 
 #include "Base64.h"
 #include "HexCoding.h"
@@ -18,6 +19,10 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+
+#include "Polkadot/Signer.h"
+#include "Polkadot/Extrinsic.h"
+#include "proto/Polkadot.pb.h"
 
 namespace TW::WalletConsole {
 
@@ -127,6 +132,54 @@ bool CommandExecutor::executeOne(const string& cmd, const vector<string>& params
     if (cmd == "dumpdp") { return _keys.dumpDP(_activeCoin, res); }
     if (cmd == "dumpxpub") { return _keys.dumpXpub(_activeCoin, res); }
     if (cmd == "pridp") { string dp; if (params.size() >= 2) dp = params[1]; return _keys.priDP(_activeCoin, dp, res); }
+    if (cmd == "sendto") {
+        string to = params[1];
+        auto toAddress = Polkadot::Address(to);
+        string privKey = params[2];
+        auto genesisHash = parse_hex("0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e");
+        //auto genesisHash = parse_hex("0x9ece38d684426a418904a0a95d6ad3dcfac1b504a805944295e4ad78c7647643");
+
+        auto input = Polkadot::Proto::SigningInput();
+        input.set_genesis_hash(genesisHash.data(), genesisHash.size());
+        input.set_nonce(0);
+        input.set_spec_version(9350);
+        // some earlier block hash
+        //auto blockHash = parse_hex("0x9ece38d684426a418904a0a95d6ad3dcfac1b504a805944295e4ad78c7647643");
+        auto blockHash = parse_hex("0xe143f23803ac50e8f6f8e62695d1ce9e4e1d68aa36c1cd2cfd15340213f3423e");
+        input.set_block_hash(blockHash.data(), blockHash.size());
+
+        auto preData = parse_hex(privKey);
+        auto privKeyBytes = PrivateKey(preData);
+        input.set_private_key(privKeyBytes.bytes.data(), privKeyBytes.bytes.size());
+        uint32_t network = ss58Prefix(TWCoinTypePolkadot);
+        // assume westend
+        if (to.rfind('5', 0) == 0) {
+            network = TWSS58AddressTypeWestend;
+        }
+        input.set_network(network);
+        // state.getRuntimeVersion api call
+        input.set_transaction_version(17);
+
+        /*auto *era = input.mutable_era();
+        era->set_block_number(0);
+        era->set_period(64);*/
+
+        auto *balanceCall = input.mutable_balance_call();
+        auto *transfer = balanceCall->mutable_transfer();
+        auto value = store(uint256_t(100000000)); // 0.1 wnd
+        string to_str = toAddress.string();
+        transfer->set_to_address(to_str);
+        transfer->set_value(value.data(), value.size());
+
+        auto extrinsic = Polkadot::Extrinsic(input);
+        auto preimage = extrinsic.encodePayload();
+
+        _out << hex(preimage) << endl;
+        auto output = Polkadot::Signer::sign(input);
+        _out << hex(output.encoded()) << endl;
+
+        return true;
+    }
 
     if (cmd == "addrpub") { if (!checkMinParams(params, 1)) { return false; } return _address.addrPub(_activeCoin, params[1], res); }
     if (cmd == "addrpri") { if (!checkMinParams(params, 1)) { return false; } return _address.addrPri(_activeCoin, params[1], res); }

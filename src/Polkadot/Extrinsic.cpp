@@ -12,6 +12,7 @@ namespace TW::Polkadot {
 
 static constexpr uint8_t signedBit = 0x80;
 static constexpr uint8_t sigTypeEd25519 = 0x00;
+static constexpr uint8_t sigTypeSr25519 = 0x01;
 static constexpr uint8_t extrinsicFormat = 4;
 static constexpr uint32_t multiAddrSpecVersion = 28;
 static constexpr uint32_t multiAddrSpecVersionKsm = 2028;
@@ -52,12 +53,12 @@ static Data getCallIndex(TWSS58AddressType network, const std::string& key) {
     if (network == TWSS58AddressTypePolkadot) {
         return polkadotCallIndices[key];
     }
-    // network == TWSS58AddressTypeKusama
+    // network == TWSS58AddressTypeKusama or westend
     return kusamaCallIndices[key];
 }
 
 bool Extrinsic::encodeRawAccount(TWSS58AddressType network, uint32_t specVersion) {
-    if ((network == TWSS58AddressTypePolkadot && specVersion >= multiAddrSpecVersion) ||
+    if (((network == TWSS58AddressTypePolkadot || network == TWSS58AddressTypeWestend) && specVersion >= multiAddrSpecVersion) ||
         (network == TWSS58AddressTypeKusama && specVersion >= multiAddrSpecVersionKsm)) {
         return false;
     }
@@ -89,7 +90,7 @@ Data Extrinsic::encodeCall(const Proto::SigningInput& input) {
 
 Data Extrinsic::encodeBalanceCall(const Proto::Balance& balance, TWSS58AddressType network, uint32_t specVersion) {
     Data data;
-    auto transfer = balance.transfer();
+    const auto& transfer = balance.transfer();
     auto address = SS58Address(transfer.to_address(), network);
     auto value = load(transfer.value());
     // call index
@@ -248,7 +249,7 @@ Data Extrinsic::encodeSignature(const PublicKey& signer, const Data& signature) 
     // signer public key
     append(data, encodeAccountId(signer.bytes, encodeRawAccount(network, specVersion)));
     // signature type
-    append(data, sigTypeEd25519);
+    append(data, signer.type == TWPublicKeyTypeSR25519 ? sigTypeSr25519 : sigTypeEd25519);
     // signature
     append(data, signature);
     // era / nonce / tip

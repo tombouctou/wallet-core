@@ -18,14 +18,15 @@ namespace TW::Polkadot {
 class Address: public SS58Address {
   public:
     /// Determines whether a string makes a valid address.
-    static bool isValid(const std::string& string) { return SS58Address::isValid(string, TWSS58AddressTypePolkadot); }
+    static bool isValid(const std::string& string) { return SS58Address::isValid(string, TWSS58AddressTypeWestend) || SS58Address::isValid(string, TWSS58AddressTypePolkadot); }
     static bool isValid(const std::string& string, uint32_t ss58Prefix) { return SS58Address::isValid(string, ss58Prefix); }
 
     /// Initializes a Polkadot address with a string representation.
-    explicit Address(const std::string& string): SS58Address(string, TWSS58AddressTypePolkadot) {}
+    /// NOTE: here we break default behavior to generate westend addr !
+    explicit Address(const std::string& string): SS58Address(string, TWSS58AddressTypeWestend) {}
 
     /// Initializes a Polkadot address with a public key.
-    explicit Address(const PublicKey& publicKey): SS58Address(publicKey, TWSS58AddressTypePolkadot) {}
+    explicit Address(const PublicKey& publicKey): SS58Address(publicKey, TWSS58AddressTypeWestend) {}
     /// Initializes a Polkadot address with a public key and a given ss58Prefix.
     explicit Address(const PublicKey& publicKey, std::uint32_t ss58Prefix): SS58Address(publicKey, ss58Prefix) {}
 };

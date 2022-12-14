@@ -1011,8 +1011,8 @@
     "id": "polkadot",
     "name": "Polkadot",
     "coinId": 354,
-    "symbol": "DOT",
-    "decimals": 10,
+    "symbol": "WND",
+    "decimals": 12,
     "blockchain": "Polkadot",
     "derivation": [
       {
@@ -1022,7 +1022,7 @@
     "curve": "ed25519",
     "publicKeyType": "ed25519",
     "addressHasher": "keccak256",
-    "ss58Prefix": 0,
+    "ss58Prefix": 42,
     "explorer": {
       "url": "https://polkadot.subscan.io",
       "txPath": "/extrinsic/",
@@ -1031,7 +1031,7 @@
     "info": {
       "url": "https://polkadot.network/",
       "source": "https://github.com/paritytech/polkadot",
-      "rpc": "",
+      "rpc": "https://westend-rpc.polkadot.io",
       "documentation": "https://polkadot.js.org/api/substrate/rpc.html"
     }
   },

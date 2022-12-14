@@ -41,6 +41,9 @@ bool PublicKey::isValid(const Data& data, enum TWPublicKeyType type) {
     case TWPublicKeyTypeSECP256k1Extended:
     case TWPublicKeyTypeNIST256p1Extended:
         return size == secp256k1ExtendedSize && data[0] == 0x04;
+    case TWPublicKeyTypeSR25519:
+        // TODO fix later
+        return true;
     default:
         return false;
     }
@@ -80,6 +83,11 @@ PublicKey::PublicKey(const Data& data, enum TWPublicKeyType type)
     case TWPublicKeyTypeED25519Cardano:
         bytes.reserve(cardanoKeySize);
         std::copy(std::begin(data), std::end(data), std::back_inserter(bytes));
+        break;
+    case TWPublicKeyTypeSR25519:
+        // TODO assert size
+        std::copy(std::begin(data), std::end(data), std::back_inserter(bytes));
+        break;
     }
 }
 

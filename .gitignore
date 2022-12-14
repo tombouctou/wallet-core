@@ -6,6 +6,7 @@
 build/
 xcode/
 cmake-build-debug/
+cmake-build-release/
 .cquery_cache/
 .cxx/
 .cache/

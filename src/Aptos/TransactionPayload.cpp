@@ -75,16 +75,20 @@ EntryFunction EntryFunction::from_json(const nlohmann::json& payload) noexcept {
     std::vector<Data> args;
     for (auto&& cur : payload.at("arguments")) {
         auto curStr = cur.get<std::string>();
-        auto* res = parse_function_argument_to_bcs(curStr.c_str());
-        args.emplace_back(parse_hex(res));
-        free_string(res);
+        // TODO uncomment when build gets fixed
+        //auto* res = parse_function_argument_to_bcs(curStr.c_str());
+        //args.emplace_back(parse_hex(res));
+
+        // free_string(res);
     }
 
     std::vector<TypeTag> tags;
 
     for (auto&& cur : payload.at("type_arguments")) {
         auto curStr = cur.get<std::string>();
-        switch (parse_type_tag(curStr.c_str())) {
+        ETypeTag tag1 = ETypeTag::Bool;
+        switch (tag1) {
+        // switch (parse_type_tag(curStr.c_str())) {
         case ETypeTag::Bool:
             break;
         case ETypeTag::U8:
